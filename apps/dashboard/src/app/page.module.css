@@ -1,0 +1,121 @@
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(100, 116, 139, 0.22);
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: grid;
+  gap: 10px;
+}
+
+.title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+}
+
+.subtext {
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.searchForm {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1 1 300px;
+  min-width: 0;
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.searchButton {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #0284c7, #0f766e);
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modeButton {
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modeButtonActive {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0284c7, #0f766e);
+  color: #ffffff;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.statusText {
+  color: #334155;
+  font-size: 0.92rem;
+}
+
+.mapShell {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 20px 20px;
+}
+
+.mapContainer {
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  border: 1px solid rgba(100, 116, 139, 0.25);
+  overflow: hidden;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  background: #cbd5e1;
+}
