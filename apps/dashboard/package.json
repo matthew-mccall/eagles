@@ -3,6 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "maplibre-gl": "^5.22.0",
+    "maplibre-react-components": "^0.2.6",
     "next": "~16.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

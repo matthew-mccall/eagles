@@ -11,13 +11,30 @@
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './{src,pages,components,app}/**/*.{ts,tsx,js,jsx,html}',
     '!./{src,pages,components,app}/**/*.{stories,spec}.{ts,tsx,js,jsx,html}',
     //     ...createGlobPatternsForDependencies(__dirname)
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        brand: {
+          DEFAULT: '#FF7F12',
+          50: '#FFF4EB',
+          100: '#FFE4CC',
+          200: '#FFC999',
+          300: '#FFAE66',
+          400: '#FF9633',
+          500: '#FF7F12',
+          600: '#E06800',
+          700: '#AD5100',
+          800: '#7A3900',
+          900: '#472100',
+        },
+      },
+    },
   },
   plugins: [],
 };

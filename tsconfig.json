@@ -8,6 +8,9 @@
     },
     {
       "path": "./apps/pocket"
+    },
+    {
+      "path": "./packages/shared"
     }
   ]
 }
