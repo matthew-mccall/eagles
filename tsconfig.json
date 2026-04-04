@@ -5,6 +5,9 @@
   "references": [
     {
       "path": "./apps/dashboard"
+    },
+    {
+      "path": "./apps/pocket"
     }
   ]
 }
