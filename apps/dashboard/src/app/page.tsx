@@ -4,10 +4,12 @@ import dynamic from 'next/dynamic';
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import type { MapViewMode } from '../components/HazardMap';
 import { mockReadings } from '../data/mock-readings';
+import type { GasReading } from '../data/mock-readings';
 import StatsCards from '../components/StatsCards';
 import ReadingsTable from '../components/ReadingsTable';
 import FilterBar from '../components/FilterBar';
 import type { Filters } from '../components/FilterBar';
+import { useWebBle } from '../hooks/useWebBle';
 
 const HazardMap = dynamic(() => import('../components/HazardMap'), { ssr: false });
 
@@ -30,6 +32,7 @@ const DEFAULT_FILTERS: Filters = {
 };
 
 export default function DashboardPage() {
+  const ble = useWebBle();
   const [activeMode, setActiveMode] = useState<MapViewMode>('clusters');
   const [layout, setLayout] = useState<LayoutMode>('dashboard');
   const [dark, setDark] = useState(false);
@@ -47,10 +50,28 @@ export default function DashboardPage() {
     document.documentElement.classList.toggle('dark', dark);
   }, [dark]);
 
-  // Client-only time to avoid hydration mismatch
+  // Live readings from mobile devices via API
+  const [liveReadings, setLiveReadings] = useState<GasReading[]>([]);
+
+  // Client-only time + poll for live readings
   useEffect(() => {
     setLastUpdated(new Date().toLocaleTimeString());
-    const id = setInterval(() => setLastUpdated(new Date().toLocaleTimeString()), 10_000);
+
+    const poll = async () => {
+      try {
+        const res = await fetch('/api/readings?limit=100');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.readings?.length) {
+            setLiveReadings(json.readings);
+          }
+        }
+      } catch { /* API may not be ready yet */ }
+      setLastUpdated(new Date().toLocaleTimeString());
+    };
+
+    poll();
+    const id = setInterval(poll, 10_000);
     return () => clearInterval(id);
   }, []);
 
@@ -103,8 +124,21 @@ export default function DashboardPage() {
     document.addEventListener('mouseup', onUp);
   }, [sidebarWidth]);
 
+  // Merge BLE readings + API readings + mock data (BLE first, then API, then mocks)
+  const allReadings = useMemo(() => {
+    const seen = new Set<string>();
+    const result: GasReading[] = [];
+    for (const r of [...ble.bleReadings, ...liveReadings, ...mockReadings]) {
+      if (!seen.has(r.id)) {
+        seen.add(r.id);
+        result.push(r);
+      }
+    }
+    return result;
+  }, [ble.bleReadings, liveReadings]);
+
   const filteredReadings = useMemo(() => {
-    return mockReadings.filter((r) => {
+    return allReadings.filter((r) => {
       if (!filters.gasTypes.includes(r.gasType)) return false;
       if (!filters.severities.includes(r.severity)) return false;
       if (filters.search) {
@@ -117,7 +151,7 @@ export default function DashboardPage() {
       }
       return true;
     });
-  }, [filters]);
+  }, [allReadings, filters]);
 
   const highAlerts = filteredReadings.filter((r) => r.severity === 'high');
 
@@ -161,6 +195,44 @@ export default function DashboardPage() {
 
         {/* Right: controls */}
         <div className="flex items-center gap-3">
+          {/* BLE connection */}
+          {ble.status === 'connected' ? (
+            <button
+              onClick={ble.disconnect}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-500/20 border border-green-400/30 rounded-lg text-xs font-medium text-green-100 hover:bg-green-500/30 transition-colors"
+            >
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              {ble.deviceName || 'Connected'}
+              <span className="text-green-300/60 ml-1">({ble.bleReadings.length})</span>
+            </button>
+          ) : (
+            <div className="flex gap-1">
+              <button
+                onClick={ble.connectReal}
+                disabled={ble.status === 'connecting'}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-xs font-medium text-white/80 hover:text-white transition-colors disabled:opacity-50"
+                title="Connect to a real Nicla Sense ME via Bluetooth"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                {ble.status === 'connecting' ? 'Connecting...' : 'BLE'}
+              </button>
+              <button
+                onClick={ble.connectMock}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-xs font-medium text-white/60 hover:text-white transition-colors"
+                title="Start mock sensor data for demo"
+              >
+                Demo
+              </button>
+            </div>
+          )}
+
+          {/* BLE error */}
+          {ble.error && (
+            <div className="px-2.5 py-1 bg-red-500/20 border border-red-400/30 rounded-lg text-[10px] text-red-200 max-w-[180px] truncate" title={ble.error}>
+              {ble.error}
+            </div>
+          )}
+
           {highAlerts.length > 0 && (
             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/20 border border-red-400/30 rounded-lg animate-pulse">
               <span className="w-2 h-2 rounded-full bg-red-500" />
@@ -260,8 +332,8 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between px-3 pt-2.5 pb-1.5">
                 <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Recent Readings</span>
                 <span className="text-[10px] text-gray-400 dark:text-gray-600">
-                  {filteredReadings.length !== mockReadings.length
-                    ? `${filteredReadings.length} / ${mockReadings.length}`
+                  {filteredReadings.length !== allReadings.length
+                    ? `${filteredReadings.length} / ${allReadings.length}`
                     : `${filteredReadings.length} total`}
                 </span>
               </div>

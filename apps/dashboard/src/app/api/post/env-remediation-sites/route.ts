@@ -2,12 +2,7 @@
 // POST /api/sync-remediation
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!
-);
+import { supabase } from "../../../../lib/supabase";
 
 const NY_URL = "https://data.ny.gov/resource/c6ci-rzpg.json";
 const PAGE_SIZE = 1000;

@@ -1,29 +1,26 @@
 /**
  * API service for relaying readings from the mobile app to the dashboard.
+ *
+ * The readings are POSTed to /api/readings which stores them in Supabase
+ * (with an in-memory fallback if the table isn't set up yet).
  */
 
+import { Platform } from 'react-native';
 import type { GasReading, ReadingBatch } from '@org/shared';
 
-// Default to local dev — in production this would be a real URL
-const DEFAULT_API_URL = 'http://10.0.2.2:3000'; // Android emulator -> host
-const IOS_API_URL = 'http://localhost:3000';
-
-export type RelayStatus = 'idle' | 'sending' | 'success' | 'error';
+// Android emulator uses 10.0.2.2 to reach host; iOS sim uses localhost
+const DEFAULT_API_URL = Platform.OS === 'android'
+  ? 'http://10.0.2.2:3000'
+  : 'http://localhost:3000';
 
 class ApiService {
-  private _baseUrl: string;
+  private _baseUrl: string = DEFAULT_API_URL;
   private _queue: GasReading[] = [];
   private _sending = false;
-  private _deviceId: string;
+  private _deviceId: string = `pocket-${Date.now().toString(36)}`;
   private _lastError: string | null = null;
   private _successCount = 0;
   private _errorCount = 0;
-
-  constructor() {
-    // Detect platform — React Native doesn't have window.navigator in the same way
-    this._baseUrl = DEFAULT_API_URL;
-    this._deviceId = `pocket-${Date.now().toString(36)}`;
-  }
 
   get baseUrl() { return this._baseUrl; }
   get deviceId() { return this._deviceId; }
@@ -32,6 +29,7 @@ class ApiService {
   get successCount() { return this._successCount; }
   get errorCount() { return this._errorCount; }
 
+  /** Set a custom base URL (e.g. for production or LAN testing) */
   setBaseUrl(url: string) {
     this._baseUrl = url.replace(/\/$/, '');
   }

@@ -5,6 +5,7 @@
   "scripts": {},
   "private": true,
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.82.0",
     "@expo/cli": "~54.0.16",
     "@nx/expo": "^22.6.2",
     "@nx/js": "22.6.2",
@@ -15,6 +16,7 @@
     "@swc/helpers": "0.5.18",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.0.0",
+    "@types/web-bluetooth": "^0.0.21",
     "autoprefixer": "10.4.13",
     "babel-preset-expo": "~54.0.7",
     "metro-config": "~0.83.0",
@@ -33,6 +35,7 @@
   "dependencies": {
     "@expo/metro-config": "~54.0.9",
     "@expo/metro-runtime": "~6.1.2",
+    "@supabase/supabase-js": "^2.101.1",
     "expo": "~54.0.0",
     "expo-splash-screen": "~31.0.11",
     "expo-status-bar": "~3.0.8",
